@@ -20,8 +20,8 @@ export class CreateAccountHandler extends ResolveLoginHandler implements JsonVie
   }
 
   public async login(): Promise<JsonRepresentation<LoginOutputType>> {
-    const account = await this.accountStore.create();
+    const accountId = await this.accountStore.create();
 
-    return { json: { accountId: account.id }};
+    return { json: { accountId }};
   }
 }

@@ -44,7 +44,7 @@ export class PasswordLoginHandler extends ResolveLoginHandler implements JsonVie
   public async login({ json }: JsonInteractionHandlerInput): Promise<JsonRepresentation<LoginOutputType>> {
     const { email, password, remember } = await validateWithError(inSchema, json);
     // Try to log in, will error if email/password combination is invalid
-    const accountId = await this.passwordStore.authenticate(email, password);
+    const { accountId } = await this.passwordStore.authenticate(email, password);
     this.logger.debug(`Logging in user ${email}`);
 
     return { json: { accountId, remember }};

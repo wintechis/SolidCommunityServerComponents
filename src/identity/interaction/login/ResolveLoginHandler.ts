@@ -1,9 +1,8 @@
 import { RepresentationMetadata } from '../../../http/representation/RepresentationMetadata';
 import { getLoggerFor } from '../../../logging/LogUtil';
-import { InternalServerError } from '../../../util/errors/InternalServerError';
 import { SOLID_HTTP } from '../../../util/Vocabularies';
 import type { AccountIdRoute } from '../account/AccountIdRoute';
-import { ACCOUNT_SETTINGS_REMEMBER_LOGIN } from '../account/util/Account';
+import { ACCOUNT_SETTINGS_REMEMBER_LOGIN } from '../account/util/AccountStore';
 import type { AccountStore } from '../account/util/AccountStore';
 import type { CookieStore } from '../account/util/CookieStore';
 import type { Json, JsonRepresentation } from '../InteractionUtil';
@@ -95,13 +94,7 @@ export abstract class ResolveLoginHandler extends JsonInteractionHandler {
   protected async updateRememberSetting(accountId: string, remember?: boolean): Promise<void> {
     if (typeof remember === 'boolean') {
       // Store the setting indicating if the user wants the cookie to persist
-      const account = await this.accountStore.get(accountId);
-      if (!account) {
-        this.logger.error(`Unable to find account ${accountId} that just logged in.`);
-        throw new InternalServerError('Unable to find account');
-      }
-      account.settings[ACCOUNT_SETTINGS_REMEMBER_LOGIN] = remember;
-      await this.accountStore.update(account);
+      await this.accountStore.updateSetting(accountId, ACCOUNT_SETTINGS_REMEMBER_LOGIN, remember);
       this.logger.debug(`Updating account remember setting to ${remember}`);
     }
   }

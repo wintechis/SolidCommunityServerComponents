@@ -1,18 +1,15 @@
 import { RepresentationMetadata } from '../../../../../src/http/representation/RepresentationMetadata';
 import type { AccountIdRoute } from '../../../../../src/identity/interaction/account/AccountIdRoute';
-import { ACCOUNT_SETTINGS_REMEMBER_LOGIN } from '../../../../../src/identity/interaction/account/util/Account';
-import type { Account } from '../../../../../src/identity/interaction/account/util/Account';
-import type { AccountStore } from '../../../../../src/identity/interaction/account/util/AccountStore';
-import type { CookieStore } from '../../../../../src/identity/interaction/account/util/CookieStore';
+import { ACCOUNT_SETTINGS_REMEMBER_LOGIN,
+  AccountStore } from '../../../../../src/identity/interaction/account/util/AccountStore';
+import { CookieStore } from '../../../../../src/identity/interaction/account/util/CookieStore';
 import type { JsonRepresentation } from '../../../../../src/identity/interaction/InteractionUtil';
 import type { JsonInteractionHandlerInput } from '../../../../../src/identity/interaction/JsonInteractionHandler';
 import type { LoginOutputType } from '../../../../../src/identity/interaction/login/ResolveLoginHandler';
 import {
   ResolveLoginHandler,
 } from '../../../../../src/identity/interaction/login/ResolveLoginHandler';
-import { InternalServerError } from '../../../../../src/util/errors/InternalServerError';
 import { CONTENT_TYPE, CONTENT_TYPE_TERM, SOLID_HTTP } from '../../../../../src/util/Vocabularies';
-import { createAccount, mockAccountStore } from '../../../../util/AccountUtil';
 
 const accountId = 'accountId';
 let output: JsonRepresentation<LoginOutputType>;
@@ -30,7 +27,6 @@ describe('A ResolveLoginHandler', (): void => {
   const cookie = 'cookie';
   let metadata: RepresentationMetadata;
   let input: JsonInteractionHandlerInput;
-  let account: Account;
   let accountStore: jest.Mocked<AccountStore>;
   let cookieStore: jest.Mocked<CookieStore>;
   let accountRoute: jest.Mocked<AccountIdRoute>;
@@ -50,13 +46,14 @@ describe('A ResolveLoginHandler', (): void => {
       metadata,
     };
 
-    account = createAccount();
-    accountStore = mockAccountStore(account);
+    accountStore = {
+      updateSetting: jest.fn(),
+    } satisfies Partial<AccountStore> as any;
 
     cookieStore = {
       generate: jest.fn().mockResolvedValue(cookie),
       delete: jest.fn(),
-    } as any;
+    } satisfies Partial<CookieStore> as any;
 
     accountRoute = {
       getPath: jest.fn().mockReturnValue('http://example.com/foo'),
@@ -78,7 +75,7 @@ describe('A ResolveLoginHandler', (): void => {
     expect(cookieStore.generate).toHaveBeenCalledTimes(1);
     expect(cookieStore.generate).toHaveBeenLastCalledWith(accountId);
     expect(cookieStore.delete).toHaveBeenCalledTimes(0);
-    expect(accountStore.get).toHaveBeenCalledTimes(0);
+    expect(accountStore.updateSetting).toHaveBeenCalledTimes(0);
   });
 
   it('generates a metadata object if the login handler did not provide one.', async(): Promise<void> => {
@@ -92,7 +89,7 @@ describe('A ResolveLoginHandler', (): void => {
     metadata: expect.any(RepresentationMetadata) });
     expect(result.metadata).not.toBe(metadata);
     expect(result.metadata?.get(CONTENT_TYPE_TERM)).toBeUndefined();
-    expect(accountStore.get).toHaveBeenCalledTimes(0);
+    expect(accountStore.updateSetting).toHaveBeenCalledTimes(0);
   });
 
   it('adds a location field if there is an OIDC interaction.', async(): Promise<void> => {
@@ -113,7 +110,7 @@ describe('A ResolveLoginHandler', (): void => {
     expect(input.oidcInteraction!.result).toEqual({
       login: { accountId: 'id' },
     });
-    expect(accountStore.get).toHaveBeenCalledTimes(0);
+    expect(accountStore.updateSetting).toHaveBeenCalledTimes(0);
   });
 
   it('updates the account remember settings if necessary.', async(): Promise<void> => {
@@ -130,24 +127,8 @@ describe('A ResolveLoginHandler', (): void => {
 
     expect(cookieStore.generate).toHaveBeenCalledTimes(1);
     expect(cookieStore.generate).toHaveBeenLastCalledWith(accountId);
-    expect(accountStore.get).toHaveBeenCalledTimes(1);
-    expect(accountStore.get).toHaveBeenLastCalledWith(accountId);
-    expect(accountStore.update).toHaveBeenCalledTimes(1);
-    expect(accountStore.update).toHaveBeenLastCalledWith(account);
-    expect(account.settings[ACCOUNT_SETTINGS_REMEMBER_LOGIN]).toBe(true);
-  });
-
-  it('errors if the account can not be found.', async(): Promise<void> => {
-    output = {
-      json: { ...output.json, remember: true },
-      metadata,
-    };
-    accountStore.get.mockResolvedValue(undefined);
-    await expect(handler.handle(input)).rejects.toThrow(InternalServerError);
-
-    expect(accountStore.get).toHaveBeenCalledTimes(1);
-    expect(accountStore.get).toHaveBeenLastCalledWith(accountId);
-    expect(accountStore.update).toHaveBeenCalledTimes(0);
+    expect(accountStore.updateSetting).toHaveBeenCalledTimes(1);
+    expect(accountStore.updateSetting).toHaveBeenLastCalledWith(accountId, ACCOUNT_SETTINGS_REMEMBER_LOGIN, true);
   });
 
   it('deletes the old cookie if there was one in the input.', async(): Promise<void> => {
@@ -164,6 +145,6 @@ describe('A ResolveLoginHandler', (): void => {
     expect(cookieStore.generate).toHaveBeenLastCalledWith(accountId);
     expect(cookieStore.delete).toHaveBeenCalledTimes(1);
     expect(cookieStore.delete).toHaveBeenLastCalledWith('old-cookie-value');
-    expect(accountStore.get).toHaveBeenCalledTimes(0);
+    expect(accountStore.updateSetting).toHaveBeenCalledTimes(0);
   });
 });

@@ -1,5 +1,5 @@
 import { PasswordLoginHandler } from '../../../../../src/identity/interaction/password/PasswordLoginHandler';
-import type { PasswordStore } from '../../../../../src/identity/interaction/password/util/PasswordStore';
+import { PasswordStore } from '../../../../../src/identity/interaction/password/util/PasswordStore';
 
 describe('A PasswordLoginHandler', (): void => {
   let json: unknown;
@@ -13,8 +13,8 @@ describe('A PasswordLoginHandler', (): void => {
     json = { email, password };
 
     passwordStore = {
-      authenticate: jest.fn().mockResolvedValue(accountId),
-    } as any;
+      authenticate: jest.fn().mockResolvedValue({ accountId }),
+    } satisfies Partial<PasswordStore> as any;
 
     handler = new PasswordLoginHandler({
       passwordStore,

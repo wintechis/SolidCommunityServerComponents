@@ -25,6 +25,7 @@
   "IdentifierSetMultiMap",
   "NodeJS.Dict",
   "NotificationChannelType",
+  "Omit",
   "PermissionMap",
   "Promise",
   "Readonly",
