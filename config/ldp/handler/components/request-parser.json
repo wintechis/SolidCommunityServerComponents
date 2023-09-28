@@ -18,7 +18,20 @@
         "@type": "WaterfallHandler",
         "handlers": [
           { "@id": "urn:solid-server:default:PatchBodyParser" },
+          { "@id": "urn:solid-server:default:PostBodyParser" },
           { "@type": "RawBodyParser" }
+        ]
+      }
+    },
+    {
+      "comment": "Handles body parsing for POST requests. Those requests need to generate an interpreted Post body.",
+      "@id": "urn:solid-server:default:PostBodyParser",
+      "@type": "MethodFilterHandler",
+      "methods": [ "POST" ],
+      "source": {
+        "@type": "WaterfallHandler",
+        "handlers": [
+          { "@type": "TestBodyParser" }
         ]
       }
     },

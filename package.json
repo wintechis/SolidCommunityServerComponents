@@ -157,6 +157,7 @@
     "rdf-string": "^1.6.3",
     "rdf-terms": "^1.9.1",
     "rdf-validate-shacl": "^0.4.5",
+    "rocketrml": "^2.1.2",
     "sparqlalgebrajs": "^4.0.5",
     "sparqljs": "^3.6.2",
     "url-join": "^4.0.1",
