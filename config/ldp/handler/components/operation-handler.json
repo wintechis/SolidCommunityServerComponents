@@ -10,6 +10,11 @@
           "store": { "@id": "urn:solid-server:default:ResourceStore" }
         },
         {
+          "@type": "PostMapOperationHandler",
+          "store": { "@id": "urn:solid-server:default:ResourceStore"  }
+        },
+
+        {
           "@type": "PostOperationHandler",
           "store": { "@id": "urn:solid-server:default:ResourceStore"  }
         },

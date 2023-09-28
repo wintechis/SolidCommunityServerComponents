@@ -57,6 +57,7 @@ export * from './http/input/body/BodyParser';
 export * from './http/input/body/N3PatchBodyParser';
 export * from './http/input/body/RawBodyParser';
 export * from './http/input/body/SparqlUpdateBodyParser';
+export * from './http/input/body/TestBodyParser';
 
 // HTTP/Input/Conditions
 export * from './http/input/conditions/BasicConditionsParser';
@@ -89,6 +90,7 @@ export * from './http/ldp/HeadOperationHandler';
 export * from './http/ldp/OperationHandler';
 export * from './http/ldp/PatchOperationHandler';
 export * from './http/ldp/PostOperationHandler';
+export * from './http/ldp/PostMapOperationHandler';
 export * from './http/ldp/PutOperationHandler';
 
 // HTTP/Output/Error
